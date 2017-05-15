@@ -76,9 +76,7 @@ summary(rf_Model)
 svm_model <- svm(train_Data[,-1],train_Data$price,type = "nu-regression")
 summary(svm_model)
 
-# #Build a linear model
-# linear_model <-lm(price~.,train_Data)
-# summary(linear_model)
+
 
 #---------Predict on Train Data----------
 # Using CART Model predict on train data
@@ -113,9 +111,7 @@ cor(train_Pred_All_Models)
 ensemble_Model = lm(price ~ ., train_Pred_All_Models)
 summary(ensemble_Model)
 
-# Check the "ensemble_Model model" on the train data
-# ensemble_Train = predict(ensemble_Model, train_Pred_All_Models_Pca)
-# regr.eval(ensemble_Train,train_Data$price)
+
 
 ensemble_Train = predict(ensemble_Model, train_Pred_All_Models)
 regr.eval(ensemble_Train,train_Data$price)
@@ -135,9 +131,7 @@ rf_Test <-predict(rf_Model,test_Data)
 regr.eval(rf_Test,test_Data$price)
 
 
-#using linear regression
-# linear_Test<- predict(linear_model,test_Data[,-1])
-# regr.eval(linear_Test,test_Data$price)
+
 
 # Combining test predictions of CART, C5.0 & Log Regression together
 test_Pred_All_Models = data.frame(CART = cart_Test,
