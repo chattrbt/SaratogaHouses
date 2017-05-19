@@ -13,7 +13,7 @@ library(vegan)
 
 
 # Set  working directory
-setwd("C:/Users/ashwin/Desktop/22nd Batch")
+setwd("C:\\Users\\gopal\\Desktop\\GNQS\\stack")
 
 
 # Read the data from csv file
@@ -34,6 +34,9 @@ num_Data = data.frame(sapply(data[,num_Attr], as.numeric))
 data <- cbind(num_Data,cat_Data)
 str(data)
 
+# ind_Attr = setdiff(attr, "price")
+# rm(attr,cat_Data,num_Data)
+# num_Attr = setdiff(attr,ind_Attr)
 
 #Standardizing numeric data
 data[,num_Attr_without_target] <- decostand(data[,num_Attr_without_target],'range')
@@ -53,6 +56,20 @@ names(data)[c(12,13,18)]
 names(data)[c(12,13,18)] <- c('heatinghot_air','heatinghot_water_steam','sewerpublic_commercial')
 
 
+# #Getting Variable Importance using Random Forest and using the important variables in the model
+# set.seed(123)
+# rf <- randomForest(price~., data=data, ntree=500,keep.forest=T, importance=TRUE)
+# round(importance(rf), 2)
+# varImpPlot(rf)
+# ## Look at variable importance:
+# imp_attributes <- importance(rf)[,1]
+# imp_attributes <- sort(imp_attributes,decreasing = T)
+# imp_attributes <- as.data.frame(imp_attributes)
+# imp_attributes <- row.names(imp_attributes)[1:20]
+# data_imp <- data[,imp_attributes]
+# data_imp <- cbind(data_imp,data$price)
+# names(data_imp)[21] <- 'price'
+# data <- data_imp
 
 
 # Divide the data into test and train
@@ -76,7 +93,9 @@ summary(rf_Model)
 svm_model <- svm(train_Data[,-1],train_Data$price,type = "nu-regression")
 summary(svm_model)
 
-
+# #Build a linear model
+# linear_model <-lm(price~.,train_Data)
+# summary(linear_model)
 
 #---------Predict on Train Data----------
 # Using CART Model predict on train data
@@ -92,7 +111,10 @@ regr.eval(rf_Train,train_Data$price)
 svm_Train <- predict(svm_model,train_Data[,-1])
 regr.eval(svm_Train,train_Data$price)
 
-
+# #using linear regression
+# linear_Train<- predict(linear_model,train_Data[,-1])
+# regr.eval(linear_Train,train_Data$price)
+# x = cor(train_Data)
 
 # Combining training predictions of CART, SVM & NN together
 train_Pred_All_Models = data.frame(CART = cart_Train,
@@ -105,13 +127,22 @@ train_Pred_All_Models = cbind(train_Pred_All_Models, price = train_Data$price)
 
 cor(train_Pred_All_Models)
 
+# #Principal Component Analysis on the dataframe
+# train_Pred_All_Models_Pca <- princomp(train_Pred_All_Models[,-5])
+# train_Pred_All_Models_Pca <- as.data.frame(train_Pred_All_Models_Pca$scores)
+# train_Pred_All_Models_Pca <- cbind(train_Pred_All_Models_Pca,train_Pred_All_Models$price)
+# names(train_Pred_All_Models_Pca)[5] <- 'price'
 
+# ensemble_Model1 = lm(price ~ ., train_Pred_All_Models_Pca)
+# summary(ensemble_Model1)
 
 #Meta-learner model
 ensemble_Model = lm(price ~ ., train_Pred_All_Models)
 summary(ensemble_Model)
 
-
+# Check the "ensemble_Model model" on the train data
+# ensemble_Train = predict(ensemble_Model, train_Pred_All_Models_Pca)
+# regr.eval(ensemble_Train,train_Data$price)
 
 ensemble_Train = predict(ensemble_Model, train_Pred_All_Models)
 regr.eval(ensemble_Train,train_Data$price)
@@ -131,7 +162,9 @@ rf_Test <-predict(rf_Model,test_Data)
 regr.eval(rf_Test,test_Data$price)
 
 
-
+#using linear regression
+# linear_Test<- predict(linear_model,test_Data[,-1])
+# regr.eval(linear_Test,test_Data$price)
 
 # Combining test predictions of CART, C5.0 & Log Regression together
 test_Pred_All_Models = data.frame(CART = cart_Test,
@@ -142,7 +175,15 @@ rm(cart_Test,knn_Test,svm_Test,nn_Test)
 # Adding the original DV to the dataframe
 test_Pred_All_Models = cbind(test_Pred_All_Models, price = test_Data$price)
 
-
+# #Principal Component Analysis on the dataframe
+# test_Pred_All_Models_Pca <- princomp(test_Pred_All_Models[,-5])
+# test_Pred_All_Models_Pca <- as.data.frame(test_Pred_All_Models_Pca$scores)
+# test_Pred_All_Models_Pca <- cbind(test_Pred_All_Models_Pca,test_Pred_All_Models$price)
+# names(test_Pred_All_Models_Pca)[5] <- 'price'
+# 
+# ensemble_Model = lm(price ~ ., test_Pred_All_Models_Pca)
+# summary(ensemble_Model)
+# 
 
 
 #Predict the values on test data
